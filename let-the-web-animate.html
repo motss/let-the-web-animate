@@ -1,0 +1,34 @@
+<link rel="import" href="../polymer/polymer.html">
+
+<!--
+`let-the-web-animate`
+Initiative to create a better web experience with 60fps buttery smooth animation
+
+@demo demo/index.html 
+-->
+
+<dom-module id="let-the-web-animate">
+  <template>
+    <style>
+      :host {
+        display: block;
+      }
+    </style>
+    <h2>Hello [[prop1]]</h2>
+  </template>
+
+  <script>
+    Polymer({
+
+      is: 'let-the-web-animate',
+
+      properties: {
+        prop1: {
+          type: String,
+          value: 'let-the-web-animate',
+        },
+      },
+
+    });
+  </script>
+</dom-module>
