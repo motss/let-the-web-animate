@@ -1,0 +1,303 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, minimum-scale=1.0, initial-scale=1.0, user-scalable=no">
+    <title>Fab to fullscreen dialog demo</title>
+    <script> window.Polymer = { lazyRegister: !0, useNativeCSSProperties: !0, dom: 'shadow' }; </script>
+
+    <link rel="import" href="../fab-to-menu-demo-icons.html">
+    <link rel="import" href="../app-fab-dialog.html">
+
+    <link rel="import" href="../../paper-icon-button/paper-icon-button.html">
+    <link rel="import" href="../../paper-fab/paper-fab.html">
+    <link rel="import" href="../../paper-item/paper-icon-item.html">
+    <link rel="import" href="../../paper-item/paper-item-body.html">
+    <link rel="import" href="../../paper-listbox/paper-listbox.html">
+
+    <link rel="import" href="../../neon-animation/animations/transform-animation.html">
+    <link rel="import" href="../../neon-animation/animations/fade-in-animation.html">
+    <link rel="import" href="../../neon-animation/animations/fade-out-animation.html">
+
+  </head>
+  <body>
+    <style is="custom-style">
+      body {
+        font-family: 'Roboto', 'Noto', sans-serif;
+        font-size: 14px;
+        color: #212121;
+        box-sizing: border-box;
+        padding: 0;
+        margin: 0;
+
+        background-color: #e0e0e0;
+      }
+
+      * {
+        box-sizing: border-box;
+      }
+
+      .add-fab {
+        position: fixed;
+        right: 16px;
+        bottom: 16px;
+      }
+
+      app-fab-dialog {
+        overflow: hidden;
+        position: fixed;
+        right: 16px;
+        bottom: 16px;
+        will-change: transform;
+      }
+      app-fab-dialog > paper-listbox {
+        background-color: rgba(0,0,0,0);
+      }
+      /*
+       * Using 100vw will lead to scaling issue when screen size increases.
+       * Find the diagonal length (the longest path from the centroid of a
+       * rectangle/ square) using Pythagoras' Theorem.
+       * In order to have the similar effect from the MD's specs,
+       * larger value is needed (>2 times of the computed length).
+       */
+      app-fab-dialog > .ripple-container {
+        width: calc(163px * 4);
+        height: calc(163px * 4);
+        position: absolute;
+        top: 50%;
+        left: 50%;
+        margin-left: calc(-163px * 2);
+        margin-top: calc(-163px * 2);
+        border-radius: 50%;
+        background-color: #fff;
+      }
+      .avatar {
+        height: 24px;
+        width: 24px;
+        border-radius: 50%;
+        opacity: .6;
+      }
+      .avatar.red {
+        background-color: #f44336;
+      }
+      .avatar.blue {
+        background-color: #2196f3;
+      }
+      .avatar.green {
+        background-color: #4caf50;
+      }
+      .avatar.yellow {
+        background-color: #ffeb3b;
+      }
+
+      .app-toolbar {
+        position: relative;
+        height: 56px;
+        width: 100%;
+        padding: 16px;
+        background-color: #00bcd4;
+        color: #424242;
+
+        @apply(--layout-horizontal);
+        @apply(--layout-center);
+      }
+      .main-title {
+        margin-left: 24px;
+        font-size: 20px;
+        color: #fff;
+      }
+      .search-icon-button {
+        margin-left: auto;
+        margin-right: 0;
+      }
+
+      .inbox-content {
+
+      }
+      .content-subheader {
+        padding: 16px;
+      }
+    </style>
+
+    <div class="app-toolbar">
+      <paper-icon-button icon="icons:menu"></paper-icon-button>
+      <div class="main-title"> Inbox </div>
+      <paper-icon-button class="search-icon-button" icon="icons:search"></paper-icon-button>
+    </div>
+
+    <div class="inbox-content">
+      <div class="content-subheader"> Today </div>
+
+      <div class="inbox-list"></div>
+    </div>
+
+    <paper-fab id="addFab" class="add-fab" icon="icons:add" onclick="_openFabDialog()"></paper-fab>
+
+    <app-fab-dialog id="fabDialog" no-outside-scrolling with-backdrop>
+      <div id="fabRipple" class="ripple-container" tabindex="-1"></div>
+
+      <paper-listbox id="fabContent" selected="{{_fabSelected}}" autofocus tabindex="-1">
+        <paper-icon-item>
+          <div class="avatar red" item-icon></div>
+          <div>Ali Connors</div>
+        </paper-icon-item>
+        <paper-icon-item>
+          <div class="avatar blue" item-icon></div>
+          <div>Sandra Adams</div>
+        </paper-icon-item>
+        <paper-icon-item>
+          <div class="avatar yellow" item-icon></div>
+          <div>Trevor Hansen</div>
+        </paper-icon-item>
+        <paper-icon-item>
+          <div class="avatar green" item-icon></div>
+          <div>Scot Masterson</div>
+        </paper-icon-item>
+        <paper-icon-item>
+          <iron-icon icon="icons:edit" item-icon></iron-icon>
+          <div>Compose new</div>
+        </paper-icon-item>
+      </paper-listbox>
+    </app-fab-dialog>
+
+    <script>
+      var _addFab = document.querySelector('.add-fab');
+      var _fabDialog = document.querySelector('app-fab-dialog');
+      var _fabRipple = document.querySelector('#fabRipple');
+      var _fabContent = document.querySelector('#fabContent');
+
+      var _inboxList = document.querySelector('.inbox-list');
+      var _innerHeight = window.innerHeight;
+
+      // Generate inbox list.
+      function _initInboxList () {
+        _inboxList.textContent = '';
+
+        var _initialCount = Math.ceil(_innerHeight / 48);
+
+        for (var i = 0; i < _initialCount; i++) {
+          var _iconItem = document.createElement('paper-icon-item');
+
+          var _avatar = document.createElement('div');
+          _avatar.setAttribute('class', 'avatar');
+          _avatar.setAttribute('item-icon', '');
+          _avatar.style.backgroundColor = 'hsl(' + (Math.random() * 360) + ', 85%, 67%)';
+
+          var _itemBody = document.createElement('paper-item-body');
+          var _firstLine = document.createElement('div');
+          var _secondaryLine = document.createElement('div');
+          _firstLine.textContent = 'Lorem ipsum dolor sit amet';
+          _secondaryLine.textContent = 'Excepteur sint occaecat cupidatat non proident';
+          _secondaryLine.setAttribute('secondary', '');
+
+          _itemBody.setAttribute('two-line', '');
+          _itemBody.appendChild(_firstLine);
+          _itemBody.appendChild(_secondaryLine);
+
+          _iconItem.appendChild(_avatar);
+          _iconItem.appendChild(_itemBody);
+
+          _inboxList.appendChild(_iconItem);
+        }
+      }
+      _initInboxList();
+
+      // When window resizes, re-render inbox list after next frame.
+      window.addEventListener('resize', function () {
+        window.requestAnimationFrame(_initInboxList);
+      });
+
+      // Restore focus on overlay closes.
+      _fabDialog.addEventListener('iron-overlay-closed', function () {
+        _addFab.style.transformOrigin = '';
+
+        _addFab.focus();
+      });
+
+      _fabContent.addEventListener('iron-select', function () {
+        _fabDialog.close();
+      });
+
+      function _openFabDialog () {
+        var _isWideLayout = window.matchMedia('(min-width: 600px)').matches;
+        var _translateY = 30;
+        var _scaleUpY = 50;
+        var _scaleDownY = 60;
+
+        if (_fabDialog) {
+          _fabDialog.animationConfig = {
+            'entry': [{
+              name: 'transform-animation',
+              transformOrigin: '-90% 0%',
+              transformFrom: 'scale3d(1, 1, 1) rotate3d(0, 0, 1, 0deg)',
+              transformTo: 'scale3d(0, 0, 0) rotate3d(0, 0, 1, 45deg)',
+              node: _addFab,
+              timing: {
+                duration: 300,
+                ease: 'ease-in',
+              }
+            }, {
+              name: 'transform-animation',
+              transformFrom: 'scale3d(0, 0, 1)',
+              transformTo: 'scale3d(1, 1, 1)',
+              node: _fabRipple,
+              transformOrigin: '50% ' + _scaleUpY + '%',
+              timing: {
+                delay: 100,
+                duration: 300,
+                ease: 'ease-in-out'
+              }
+            }, {
+              name: 'transform-animation',
+              node: _fabDialog,
+              transformOrigin: '50% 50%',
+              transformFrom: 'translate3d(0px, ' + _translateY + '%, 0px)',
+              transformTo: 'none',
+              timing: {
+                delay: 100,
+                duration: 300,
+                ease: 'ease-in'
+              }
+            }, {
+              name: 'fade-in-animation',
+              node: _fabContent,
+              timing: {
+                delay: 300,
+              }
+            }],
+            'exit': [{
+              name: 'fade-out-animation',
+              node: _fabContent,
+              timing: {
+                duration: 200
+              }
+            }, {
+              name: 'transform-animation',
+              transformFrom: 'scale3d(1, 1, 1)',
+              transformTo: 'scale3d(0, 0, 1)',
+              node: _fabRipple,
+              transformOrigin: '50% ' + _scaleDownY + '%',
+              timing: {
+                duration: 200,
+                ease: 'ease-in-out'
+              }
+            }, {
+              name: 'transform-animation',
+              transformOrigin: '-90% 0%',
+              transformFrom: 'scale3d(0, 0, 0) rotate3d(0, 0, 1, 45deg)',
+              transformTo: 'scale3d(1, 1, 1) rotate3d(0, 0, 1, 0deg)',
+              node: _addFab,
+              timing: {
+                delay: 100,
+                duration: 200,
+                ease: 'ease-in',
+              }
+            }]
+          };
+
+          _fabDialog.open();
+        }
+      }
+    </script>
+  </body>
+</html>

@@ -18,7 +18,9 @@
     "neon-animation": "PolymerElements/neon-animation#^1.2.3",
     "iron-icon": "PolymerElements/iron-icon#^1.0.8",
     "paper-behaviors": "PolymerElements/paper-behaviors#^1.0.11",
-    "paper-checkbox": "PolymerElements/paper-checkbox#^1.2.1"
+    "paper-checkbox": "PolymerElements/paper-checkbox#^1.2.1",
+    "paper-dialog-behavior": "PolymerElements/paper-dialog-behavior#^1.2.7",
+    "paper-listbox": "PolymerElements/paper-listbox#^1.1.2"
   },
   "devDependencies": {
     "iron-component-page": "PolymerElements/iron-component-page#^1.0.0",
