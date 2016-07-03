@@ -1,0 +1,633 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, minimum-scale=1.0, initial-scale=1.0, user-scalable=no">
+    <title>fab morph demo</title>
+    <script> window.Polymer = { lazyRegister: !0, useNativeCSSProperties: !0, dom: 'shadow' }; </script>
+
+    <link rel="import" href="../fab-morph-demo-icons.html">
+
+    <link rel="import" href="../../iron-flex-layout/iron-flex-layout.html">
+    <link rel="import" href="../../iron-image/iron-image.html">
+
+    <link rel="import" href="../../paper-icon-button/paper-icon-button.html">
+    <link rel="import" href="../../paper-styles/shadow.html">
+    <link rel="import" href="../../paper-fab/paper-fab.html">
+    <link rel="import" href="../../paper-slider/paper-slider.html">
+    <link rel="import" href="web-animation.html">
+  </head>
+  <body>
+    <style is="custom-style">
+      body {
+        font-family: 'Roboto', 'Noto', sans-serif;
+        font-size: 14px;
+        color: #212121;
+        padding: 0;
+        margin: 0;
+        box-sizing: border-box;
+      }
+
+      * {
+        box-sizing: border-box;
+      }
+
+      .app-toolbar {
+        position: relative;
+        height: 56px;
+        width: 100%;
+        padding: 0 16px;
+        z-index: 9;
+
+        @apply(--layout-horizontal);
+        @apply(--layout-center);
+      }
+      .app-toolbar paper-icon-button[alt="favorite"] {
+        margin-left: auto;
+        margin-right: 8px;
+      }
+
+      iron-image {
+        position: absolute;
+        top: 0;
+        width: 100%;
+        height: calc(100vh - var(--16-by-9-ratio, calc(var(--max-device-width-allowed, 100vw) / 16 * 9)));
+      }
+
+      .content {
+        position: fixed;
+        left: 0;
+        bottom: 0;
+        width: 100%;
+        height: var(--16-by-9-ratio, calc(var(--max-device-width-allowed, 100vw) / 16 * 9));
+
+        @apply(--layout-vertical);
+        @apply(--layout-center-justified);
+      }
+
+      .top-section {
+        position: relative;
+        overflow: hidden;
+        z-index: 1;
+        color: #fff;
+        background-color: #2b546a;
+
+        @apply(--layout-horizontal);
+        @apply(--layout-center);
+        @apply(--layout-flex);
+      }
+      .top-section-content {
+        padding-left: 64px;
+        font-size: 48px;
+        pointer-events: none;
+      }
+      .top-section-content .album-name {
+        padding-top: 8px;
+        font-size: 16px;
+      }
+
+      .bottom-section {
+        position: relative;
+        height: 72px;
+        width: 100%;
+        font-size: 16px;
+        color: #757575;
+      }
+      .song-list {
+        position: absolute;
+        background-color: #fff;
+        width: inherit;
+        height: inherit;
+
+        @apply(--layout-horizontal);
+        @apply(--layout-center);
+      }
+      .flex {
+        @apply(--layout-flex);
+      }
+      .flex3 {
+        padding-left: 36px;
+        @apply(--layout-flex-3);
+      }
+      .song-name {
+        color: #212121;
+      }
+      .align-right {
+        text-align: right;
+      }
+      .align-center {
+        @apply(--layout-horizontal);
+        @apply(--layout-center-justified);
+      }
+
+      .play-button {
+        position: fixed;
+        right: 16px;
+        color: #225452;
+        background-color: #4cb6ac;
+        bottom: calc(var(--max-device-width-allowed, 100vw) / 16 * 9 - 28px);
+        z-index: 12;
+        transform-origin: var(--play-button-transform-origin, -155% -115%);
+
+        @apply(--shadow-elevation-12dp);
+      }
+      .play-button[playing] {
+        opacity: 0;
+        pointer-events: none;
+      }
+
+      .playback-bar {
+        position: absolute;
+        height: 20px;
+        top: 0;
+        width: 100%;
+        background-color: #fff;
+        will-change: transform;
+      }
+      .playback-snap {
+        height: 100%;
+        width: 3px;
+        background-color: #225452;
+        margin-left: 48px;
+        margin-right: auto;
+      }
+
+      .playback-controls {
+        position: absolute;
+        width: 100%;
+        top: 50%;
+        left: 50%;
+        transform: translate3d(-50%, -50%, 0px);
+
+        @apply(--layout-vertical);
+        @apply(--layout-center);
+      }
+      .main-control {
+        padding-bottom: 16px;
+        width: 280px;
+
+        @apply(--layout-horizontal);
+        @apply(--layout-center);
+      }
+      .main-control > paper-icon-button,
+      .pause-button {
+        color: #2b546a;
+        opacity: 0;
+        z-index: 2;
+      }
+      .volume-control {
+        opacity: 0;
+        z-index: 2;
+
+        @apply(--layout-horizontal);
+        @apply(--layout-center);
+      }
+      .volume-control paper-icon-button {
+        color: rgba(0,0,0,.25);
+      }
+      .playback-controls paper-slider {
+        --paper-slider-container-color: rgba(0,0,0,.25);
+        --paper-slider-active-color: #fff;
+        --paper-slider-knob-color: #fff;
+      }
+
+      .playback-detail {
+        position: absolute;
+        background-color: #2b546a;
+        padding-left: 24px;
+        height: inherit;
+        width: inherit;
+        color: #fff;
+
+        @apply(--layout-horizontal);
+        @apply(--layout-center);
+      }
+      .playback-detail > div {
+        opacity: 0;
+      }
+
+      /* playng styling */
+      .content[playing] > .top-section {
+        background-color: #4cb6ac;
+      }
+      .content[playing] .playback-controls {
+        opacity: 1;
+      }
+      .content[playing] .top-section-content {
+        opacity: 0;
+      }
+      .content[playing] .playback-detail > div {
+        opacity: 1;
+      }
+      .content[playing] .song-list {
+        opacity: 0;
+      }
+      .content[playing] .playback-bar {
+        transform: translate3d(0px, -20px, 0px);
+      }
+      .content[playing] .main-control > paper-icon-button {
+        opacity: 1;
+      }
+      .content[playing] .volume-control {
+        opacity: 1;
+      }
+      .content[playing] .ripple,
+      .content[playing] .pause-button {
+        opacity: 1;
+      }
+
+      /* pausing styling */
+      .content[playing] > .top-section[transparent] {
+        background-color: #2b546a;
+      }
+      .content[playing] > .top-section[transparent] .ripple {
+        transform: var(--pause-ripple-scale);
+      }
+
+
+      .ripple {
+        position: absolute;
+        width: 40px;
+        height: 40px;
+        left: calc(50% - 20px);
+        border-radius: 50%;
+        background-color: #4cb6ac;
+        opacity: 0;
+      }
+
+      .fab-ripple {
+        position: absolute;
+        width: 4px;
+        height: 4px;
+        top: 50%;
+        left: 50%;
+        border-radius: 50%;
+        background-color: #2b546a;
+        opacity: 0;
+
+        will-change: transform;
+      }
+
+      @media (min-width: 415px) {
+        :root {
+          --max-device-width-allowed: 414px;
+          --play-button-transform-origin: calc(-115% * var(--transform-origin-scale)) calc(-115% * var(--transform-origin-scale));
+        }
+      }
+
+    </style>
+
+    <div class="app-toolbar">
+      <paper-icon-button alt="back" icon="icons:arrow-back"></paper-icon-button>
+      <paper-icon-button alt="favorite" icon="icons:star-border"></paper-icon-button>
+      <paper-icon-button alt="more options" icon="icons:more-vert"></paper-icon-button>
+    </div>
+
+    <iron-image alt="Kodaline In a Perfect World" src="../img/kodaline-in-a-perfect-world.jpg" placeholder="data:image/jpeg;base64,/9j/4AAQSkZJRgABAQEAYABgAAD/4QAiRXhpZgAATU0AKgAAAAgAAQESAAMAAAABAAEAAAAAAAD/2wBDAAIBAQIBAQICAgICAgICAwUDAwMDAwYEBAMFBwYHBwcGBwcICQsJCAgKCAcHCg0KCgsMDAwMBwkODw0MDgsMDAz/2wBDAQICAgMDAwYDAwYMCAcIDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAz/wAARCAAKAAoDASIAAhEBAxEB/8QAHwAAAQUBAQEBAQEAAAAAAAAAAAECAwQFBgcICQoL/8QAtRAAAgEDAwIEAwUFBAQAAAF9AQIDAAQRBRIhMUEGE1FhByJxFDKBkaEII0KxwRVS0fAkM2JyggkKFhcYGRolJicoKSo0NTY3ODk6Q0RFRkdISUpTVFVWV1hZWmNkZWZnaGlqc3R1dnd4eXqDhIWGh4iJipKTlJWWl5iZmqKjpKWmp6ipqrKztLW2t7i5usLDxMXGx8jJytLT1NXW19jZ2uHi4+Tl5ufo6erx8vP09fb3+Pn6/8QAHwEAAwEBAQEBAQEBAQAAAAAAAAECAwQFBgcICQoL/8QAtREAAgECBAQDBAcFBAQAAQJ3AAECAxEEBSExBhJBUQdhcRMiMoEIFEKRobHBCSMzUvAVYnLRChYkNOEl8RcYGRomJygpKjU2Nzg5OkNERUZHSElKU1RVVldYWVpjZGVmZ2hpanN0dXZ3eHl6goOEhYaHiImKkpOUlZaXmJmaoqOkpaanqKmqsrO0tba3uLm6wsPExcbHyMnK0tPU1dbX2Nna4uPk5ebn6Onq8vP09fb3+Pn6/9oADAMBAAIRAxEAPwDv/gP/AMFCtHvPA9kuseDbWPVDHmSaxu1MLNj76O0JZcc8FiR/e7iXU/8AgoNYy6lcM3ga1nZpWJlfxLBukOT8x/cdT1r80fB0zrBb/M33W7+2apXur3QvJv8ASrj75/5aH1r6mWWpSu5t/wBeTR8DHNqvLypJfJfqf//Z" preload sizing="cover" fade></iron-image>
+
+    <div class="content">
+      <div class="playback-bar">
+        <div class="playback-snap"></div>
+      </div>
+
+      <div class="top-section">
+        <div class="playback-controls">
+          <div class="main-control">
+            <paper-icon-button class="fast-rewind" alt="fast rewind" icon="icons:fast-rewind"></paper-icon-button>
+            <div class="flex align-center">
+              <div class="ripple"></div>
+
+              <paper-icon-button class="pause-button" alt="pause" icon="icons:pause" onclick="_togglePlayback()"></paper-icon-button>
+            </div>
+            <paper-icon-button class="fast-forward" alt="fast forward" icon="icons:fast-forward"></paper-icon-button>
+          </div>
+
+          <div class="volume-control">
+            <paper-icon-button alt="volume mute" icon="icons:volume-mute"></paper-icon-button>
+            <paper-slider min="10" max="200" value="110" noink></paper-slider>
+            <paper-icon-button alt="volume up" icon="icons:volume-up"></paper-icon-button>
+          </div>
+        </div>
+
+        <div class="top-section-content">
+          <div> Kodaline </div>
+          <div class="album-name"> In a Perfect World </div>
+        </div>
+      </div>
+
+      <div class="bottom-section">
+        <div class="playback-detail">
+          <div> Kodaline/ In a Perfect World </div>
+        </div>
+
+        <div class="song-list">
+          <div class="flex align-right"> 1 </div>
+          <div class="flex3 song-name"> One Day </div>
+          <div class="flex"> 4:15 </div>
+        </div>
+      </div>
+    </div>
+
+    <paper-fab class="play-button" alt="play" icon="icons:play-arrow" onclick="_togglePlayback()"></paper-fab>
+
+    <script>
+      var _innerWidth = window.innerWidth;
+
+      var _content = document.querySelector('.content');
+      var _topSection = document.querySelector('.top-section');
+      var _topSectionContent = document.querySelector('.top-section-content');
+      var _playbackDetail = document.querySelector('.playback-detail');
+      var _playbackDetailDiv = document.querySelector('.playback-detail > div');
+      var _songList = document.querySelector('.song-list');
+      var _playbackBar = document.querySelector('.playback-bar');
+      var _fastRewind = document.querySelector('.fast-rewind');
+      var _fastForward = document.querySelector('.fast-forward');
+      var _volumeControl = document.querySelector('.volume-control');
+
+      var _playButton = document.querySelector('.play-button');
+      var _playButtonIcon = _playButton.shadowRoot.querySelector('iron-icon');
+      var _pauseButton = document.querySelector('.pause-button');
+      var _ripple = document.querySelector('.ripple');
+
+      function _togglePlayback () {
+        var _isPlaying = _content.hasAttribute('playing');
+        var _shouldHidePlayButton = !_playButton.hasAttribute('playing');
+
+        if (_shouldHidePlayButton) {
+          var _scaleUp = Math.sqrt(Math.pow((_innerWidth / 2), 2) + Math.pow((_innerWidth / 16 * 9 / 2), 2)) / 20;
+
+          if (window.matchMedia('(min-width: 600px)').matches) {
+            _setTransformOriginScale(_innerWidth);
+          }
+
+          _playButton.icon = 'icons:pause';
+          _runPlayAnimation(_isPlaying, _shouldHidePlayButton, _scaleUp);
+        }else {
+          var _scaleDown = Math.sqrt(Math.pow((_innerWidth / 2), 2) + Math.pow((_innerWidth / 16 * 9 / 2), 2)) / 20;
+
+          _pauseButton.icon = 'icons:play-arrow';
+          _topSection.setAttribute('transparent', '');
+          document.documentElement.style.setProperty('--pause-ripple-scale', 'scale3d(' + _scaleDown + ', ' + _scaleDown + ', 1)');
+          _runPauseAnimation(_isPlaying, _shouldHidePlayButton, _scaleDown);
+        }
+      }
+
+      function _setTransformOriginScale (_innerWidth) {
+        var _newScale = (_innerWidth / 414);
+
+        document.documentElement.style.setProperty('--transform-origin-scale', _newScale);
+      }
+
+      function _runPlayAnimation (_isPlaying, _shouldHidePlayButton, _scaleUp) {
+        // group animation part 1A.
+        var _rotatePlayButton = new KeyframeEffect(_playButton, [
+          { transform: 'rotateZ(0deg)', opacity: 1, offset: 0 },
+          { transform: 'rotateZ(54deg)', opacity: 1, offset: 0.9 },
+          { transform: 'rotateZ(60deg)', opacity: 0, offset: 1 }
+        ], {
+          duration: 350,
+          easing: 'ease',
+          fill: 'forwards',
+        });
+        var _rotatePlayButtonIcon = new KeyframeEffect(_playButtonIcon, [
+          { transform: 'rotateZ(0deg)' },
+          { transform: 'rotateZ(-60deg)' },
+        ], {
+          duration: 350,
+          easing: 'ease',
+          fill: 'forwards',
+        });
+        var _fadeOutTopSectionContent = new KeyframeEffect(_topSectionContent, [
+          { transform: 'translate3d(0px, 0px, 0px)', opacity: 1 },
+          { transform: 'translate3d(0px, 24px, 0px)', opacity: 0 },
+        ], {
+          duration: 300,
+          fill: 'forwards',
+        });
+        var _fadeOutSongList = new KeyframeEffect(_songList, [
+          { transform: 'translate3d(0px, 0px, 0px)' },
+          { transform: 'translate3d(0px, 72px, 0px)' },
+        ], {
+          duration: 300,
+          fill: 'forwards',
+        });
+        var _moveDownPlaybackDetail = new KeyframeEffect(_playbackDetail, [
+          { transform: 'translate3d(0px, -72px, 0px)' },
+          { transform: 'translate3d(0px, 0px, 0px)' },
+        ], {
+          duration: 500,
+          fill: 'forwards',
+        });
+
+        // group animation part 2A.
+        var _scalePlayButton = new KeyframeEffect(_ripple, [
+          { transform: 'translate3d(24px, 0px, 0px) scale3d(1, 1, 1)', opacity: 1, },
+          { transform: 'translate3d(0px, 0px, 0px) scale3d(' + _scaleUp + ', ' + _scaleUp + ', 1)', opacity: 1, }
+        ], {
+          delay: 220,
+          duration: 300,
+          fill: 'forwards',
+        });
+        var _fadeInPauseButton = new KeyframeEffect(_pauseButton, [
+          { transform: 'translate3d(24px, 0px, 0px)', opacity: 1, },
+          { transform: 'translate3d(0px, 0px, 0px)', opacity: 1, }
+        ], {
+          delay: 220,
+          duration: 300,
+          fill: 'forwards',
+        });
+        var _fadeInFastRewind = new KeyframeEffect(_fastRewind, [
+          { opacity: 0 }, { opacity: 1 }
+        ], {
+          delay: 150,
+          duration: 350,
+          fill: 'forwards',
+        });
+        var _fadeInFastForward = new KeyframeEffect(_fastForward, [
+          { opacity: 0 }, { opacity: 1 }
+        ], {
+          delay: 150,
+          duration: 350,
+          fill: 'forwards',
+        });
+        var _fadeInPlaybackDetailDiv = new KeyframeEffect(_playbackDetailDiv, [
+          { transform: 'translate3d(0px, 24px, 0px)', opacity: 0 },
+          { transform: 'translate3d(0px, 0px, 0px)', opacity: 1}
+        ], {
+          delay: 180,
+          duration: 320,
+          fill: 'forwards',
+        });
+        var _moveUpPlaybackBar = new KeyframeEffect(_playbackBar, [
+          { transform: 'translate3d(0px, 0px, 0px)' },
+          { transform: 'translate3d(0px, -20px, 0px)' },
+        ], {
+          delay: 180,
+          duration: 320,
+          fill: 'forwards',
+        });
+        var _fadeInVolumeControl = new KeyframeEffect(_volumeControl, [
+          { opacity: 0 }, { opacity: 1 }
+        ], {
+          delay: 200,
+          duration: 300,
+          fill: 'forwards',
+        });
+
+        // group animation part 1B.
+        var _fadeOutInitialView = new GroupEffect([
+          _rotatePlayButton,
+          _rotatePlayButtonIcon,
+          _fadeOutTopSectionContent,
+          _fadeOutSongList,
+          _moveDownPlaybackDetail,
+        ]);
+
+        // group animation part 2B.
+        var _scaleRippleFadeControls = new GroupEffect([
+          _scalePlayButton,
+          _fadeInPauseButton,
+          _fadeInFastRewind,
+          _fadeInFastForward,
+          _fadeInPlaybackDetailDiv,
+          _moveUpPlaybackBar,
+          _fadeInVolumeControl,
+        ]);
+
+        var _groupAllEffect = new GroupEffect([
+          _fadeOutInitialView,
+          _scaleRippleFadeControls,
+        ]);
+
+        var _playNowTimeline = document.timeline.play(_groupAllEffect);
+        _playNowTimeline.finished.then(function () {
+          _content[_isPlaying ? 'removeAttribute' : 'setAttribute']('playing', '');
+          _playButton[_shouldHidePlayButton ? 'setAttribute' : 'removeAttribute']('playing', '');
+          _playButton.icon = 'icons:play-arrow';
+        });
+      }
+
+      function _runPauseAnimation (_isPlaying, _shouldHidePlayButton, _scaleDown) {
+        // group animation part 1A.
+        var _fadeOutFastRewind = new KeyframeEffect(_fastRewind, [
+          { opacity: 1 }, { opacity: 0 }
+        ], {
+          duration: 150,
+          fill: 'forwards',
+        });
+        var _fadeOutFastForward = new KeyframeEffect(_fastForward, [
+          { opacity: 1 }, { opacity: 0 }
+        ], {
+          duration: 150,
+          fill: 'forwards',
+        });
+        var _fadeOutPlaybackDetailDiv = new KeyframeEffect(_playbackDetailDiv, [
+          { transform: 'translate3d(0px, 0px, 0px)', opacity: 1},
+          { transform: 'translate3d(0px, -24px, 0px)', opacity: 0 },
+        ], {
+          duration: 150,
+          fill: 'forwards',
+        });
+        var _fadeOutVolumeControl = new KeyframeEffect(_volumeControl, [
+          { opacity: 1 }, { opacity: 0 }
+        ], {
+          duration: 150,
+          fill: 'forwards',
+        });
+        var _moveDownPlaybackBar = new KeyframeEffect(_playbackBar, [
+          { transform: 'translate3d(0px, -20px, 0px)' },
+          { transform: 'translate3d(0px, 0px, 0px)' },
+        ], {
+          duration: 500,
+          fill: 'forwards',
+        });
+        var _scalePauseButton = new KeyframeEffect(_ripple, [
+          { transform: 'translate3d(0px, 0px, 0px) scale3d(' + _scaleDown + ', ' + _scaleDown + ', 1)', opacity: 1, offset: 0 },
+          { transform: 'translate3d(21.6px, 0px, 0px) scale3d(' + _scaleDown * .1 + ', ' + _scaleDown * .1 + ', 1)', opacity: 1, offset: .9 },
+          { transform: 'translate3d(24px, 0px, 0px) scale3d(.1, .1, 1)', opacity: 0, offset: 1 },
+        ], {
+          duration: 250,
+          fill: 'forwards',
+        });
+        var _fadeOutPauseButton = new KeyframeEffect(_pauseButton, [
+          { transform: 'translate3d(0px, 0px, 0px)', opacity: 1, offset: 0 },
+          { transform: 'translate3d(21.6px, 0px, 0px)', opacity: 1, offset: .9 },
+          { transform: 'translate3d(24px, 0px, 0px)', opacity: 0, offset: 1 }
+        ], {
+          duration: 250,
+          fill: 'forwards',
+        });
+
+        // group animation part 2A.
+        var _moveUpPlaybackDetail = new KeyframeEffect(_playbackDetail, [
+          { transform: 'translate3d(0px, 0px, 0px)' },
+          { transform: 'translate3d(0px, -72px, 0px)' },
+        ], {
+          duration: 500,
+          fill: 'forwards',
+        });
+        var _fadeInTopSectionContent = new KeyframeEffect(_topSectionContent, [
+          { transform: 'translate3d(0px, 24px, 0px)', opacity: 0 },
+          { transform: 'translate3d(0px, 0px, 0px)', opacity: 1 },
+        ], {
+          delay: 200,
+          duration: 300,
+          fill: 'forwards',
+        });
+        var _fadeInSongList = new KeyframeEffect(_songList, [
+          { transform: 'translate3d(0px, 72px, 0px)', opacity: 0 },
+          { transform: 'translate3d(0px, 0px, 0px)', opacity: 1 },
+        ], {
+          delay: 200,
+          duration: 300,
+          fill: 'forwards',
+        });
+        var _rotatePlayButton = new KeyframeEffect(_playButton, [
+          { transform: 'rotateZ(60deg)', opacity: 1 },
+          { transform: 'rotateZ(0deg)', opacity: 1 },
+        ], {
+          delay: 230,
+          duration: 300,
+          easing: 'ease',
+          fill: 'forwards',
+        });
+        var _rotatePlayButtonIcon = new KeyframeEffect(_playButtonIcon, [
+          { transform: 'rotateZ(-60deg)' },
+          { transform: 'rotateZ(0deg)' },
+        ], {
+          delay: 230,
+          duration: 300,
+          easing: 'ease',
+          fill: 'forwards',
+        });
+
+        var _fadeOutControlsScaleRipple = new GroupEffect([
+          _fadeOutFastRewind,
+          _fadeOutFastForward,
+          _fadeOutPlaybackDetailDiv,
+          _fadeOutVolumeControl,
+          _moveDownPlaybackBar,
+          _scalePauseButton,
+          _fadeOutPauseButton,
+        ]);
+        var _fadeInInitialView = new GroupEffect([
+          _moveUpPlaybackDetail,
+          _fadeInTopSectionContent,
+          _fadeInSongList,
+          _rotatePlayButton,
+          _rotatePlayButtonIcon,
+        ]);
+
+        var _groupAllEffect = new GroupEffect([_fadeOutControlsScaleRipple, _fadeInInitialView])
+        var _pauseNowTimeline = document.timeline.play(_groupAllEffect);
+        _pauseNowTimeline.finished.then(function () {
+          _content[_isPlaying ? 'removeAttribute' : 'setAttribute']('playing', '');
+          _playButton[_shouldHidePlayButton ? 'setAttribute' : 'removeAttribute']('playing', '');
+          _topSection.removeAttribute('transparent');
+          _pauseButton.icon = 'icons:pause';
+        });
+      }
+
+    </script>
+  </body>
+</html>
