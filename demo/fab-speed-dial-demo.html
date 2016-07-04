@@ -1,0 +1,119 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, minimum-scale=1.0, initial-scale=1.0, user-scalable=no">
+    <title>Fab speed dial demo</title>
+    <script> window.Polymer = { lazyRegister: !0, useNativeCSSProperties: !0, dom: 'shadow' }; </script>
+
+    <link rel="import" href="../fab-speed-dial-demo-icons.html">
+    <link rel="import" href="../app-speed-dial.html">
+
+    <link rel="import" href="../../paper-fab/paper-fab.html">
+
+    <link rel="import" href="../../google-map/google-map.html">
+  </head>
+  <body>
+    <style is="custom-style">
+      body {
+        font-family: 'Roboto', 'Noto', sans-serif;
+        font-size: 14px;
+        color: #212121;
+        box-sizing: border-box;
+        padding: 0;
+        margin: 0;
+
+        background-color: #e0e0e0;
+      }
+
+      * {
+        box-sizing: border-box;
+      }
+
+      .map {
+        height: 100vh;
+        width: 100vw;
+      }
+
+      paper-fab.my-location {
+        background-color: #fff;
+        color: #616161;
+        bottom: calc(72px + 16px);
+        opacity: 1;
+        pointer-events: auto;
+        transform: scale3d(1, 1, 1);
+        transition: transform .3s ease;
+
+        will-change: transform;
+      }
+      paper-fab.my-location.hidden {
+        transform: scale3d(0, 0, 1);
+        opacity: 0;
+        pointer-events: none;
+      }
+
+      .my-location,
+      .add-fab {
+        position: fixed;
+        right: 16px;
+        bottom: 16px;
+        will-change: transform;
+      }
+      .speed-dial {
+        background-color: #4086f4;
+      }
+      .speed-dial > .speed-dial-content > paper-fab {
+        background-color: #fff;
+        color: #757575;
+      }
+      .speed-dial {
+        --app-speed-dial-scrim-background: rgba(0,0,0,.2);
+      }
+    </style>
+
+    <google-map class="map" api-key="AIzaSyCQZ6yz01DbnXwT2YzjsNzUn7HUbMVpvFE" latitude="37.77493" longitude="-122.41492" disable-default-ui drag-events></google-map>
+
+    <paper-fab class="my-location" icon="icons:my-location"></paper-fab>
+
+    <app-speed-dial id="speedDial" class="add-fab speed-dial" front-icon="icons:share" back-icon="icons:close" onclick="_openSpeedDial(event)">
+      <div class="speed-dial-content">
+        <paper-fab mini icon="icons:mail"></paper-fab>
+        <paper-fab mini icon="icons:content-copy"></paper-fab>
+        <paper-fab mini icon="icons:g-plus"></paper-fab>
+        <paper-fab mini icon="icons:facebook"></paper-fab>
+        <paper-fab mini icon="icons:twitter"></paper-fab>
+      </div>
+    </app-speed-dial>
+
+    <script>
+      var _speedDial = document.querySelector('.speed-dial');
+      var _map = document.querySelector('.map');
+      var _myLocation = document.querySelector('.my-location');
+
+      // Cancel on outside click.
+      document.addEventListener('click', function (ev) {
+        _cancelSpeedDial(ev);
+      });
+
+      // Cancel on map drag.
+      _map.addEventListener('google-map-dragstart', function (ev) {
+        _cancelSpeedDial(ev);
+      });
+
+      // Unhide my-location.
+      _speedDial.addEventListener('opened-changed', function () {
+        _myLocation.setAttribute('class', _speedDial.opened ? 'my-location hidden' : 'my-location');
+      });
+
+      function _cancelSpeedDial (ev) {
+        if (ev.target.tagName !== 'APP-SPEED-DIAL' && _speedDial.opened) {
+          _speedDial.close();
+        }
+      }
+
+      function _openSpeedDial (ev) {
+        _speedDial.toggle();
+      }
+    </script>
+  </body>
+</html>
