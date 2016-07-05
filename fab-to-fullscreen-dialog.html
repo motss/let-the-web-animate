@@ -281,13 +281,23 @@
 
             _target.open();
             _fullscreenDialog.open();
+
+            this.fire('open-fullscreen-dialog', {
+              target: Polymer.dom(ev).localTarget.tagName,
+              type: ev.type,
+            });
           }
         },
-        _closeFullscreenDialog: function () {
+        _closeFullscreenDialog: function (ev) {
           var _fullscreenDialog = this.$.fullscreenDialog;
 
           if (_fullscreenDialog) {
             _fullscreenDialog.close();
+
+            this.fire('close-fullscreen-dialog', {
+              target: Polymer.dom(ev).localTarget.tagName,
+              type: ev.type,
+            });
           }
         },
 

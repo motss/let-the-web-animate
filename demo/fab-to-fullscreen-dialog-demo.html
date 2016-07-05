@@ -6,6 +6,7 @@
     <title>Fab to fullscreen dialog demo</title>
     <script> window.Polymer = { lazyRegister: !0, useNativeCSSProperties: !0, dom: 'shadow' }; </script>
 
+    <link rel="import" href="demo-ga.html">
     <link rel="import" href="../fab-to-fullscreen-dialog.html">
     <link rel="import" href="../fab-to-fullscreen-dialog-icons.html">
 
@@ -253,5 +254,25 @@
 
       <fab-to-fullscreen-dialog></fab-to-fullscreen-dialog>
     </div>
+
+    <script>
+      var _fabToFullscreenDialog = document.querySelector('fab-to-fullscreen-dialog');
+
+      _fabToFullscreenDialog.addEventListener('open-fullscreen-dialog', function (ev) {
+        ga('send', 'event', {
+          eventCategory: ev.detail.target,
+          eventAction: ev.detail.type,
+          eventLabel: 'fullscreen dialog tapped to open',
+        });
+      });
+      _fabToFullscreenDialog.addEventListener('close-fullscreen-dialog', function (ev) {
+        ga('send', 'event', {
+          eventCategory: ev.detail.target,
+          eventAction: ev.detail.type,
+          eventLabel: 'fullscreen dialog tapped to close',
+        });
+      });
+    </script>
+    <demo-ga></demo-ga>
   </body>
 </html>

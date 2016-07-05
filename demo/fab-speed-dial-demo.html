@@ -3,9 +3,11 @@
   <head>
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, minimum-scale=1.0, initial-scale=1.0, user-scalable=no">
+    <meta name="description" content="Demo to showcase how a speed dial fab works.">
     <title>Fab speed dial demo</title>
     <script> window.Polymer = { lazyRegister: !0, useNativeCSSProperties: !0, dom: 'shadow' }; </script>
 
+    <link rel="import" href="demo-ga.html">
     <link rel="import" href="../fab-speed-dial-demo-icons.html">
     <link rel="import" href="../app-speed-dial.html">
 
@@ -73,7 +75,7 @@
 
     <google-map class="map" api-key="AIzaSyCQZ6yz01DbnXwT2YzjsNzUn7HUbMVpvFE" latitude="37.77493" longitude="-122.41492" disable-default-ui drag-events></google-map>
 
-    <paper-fab class="my-location" icon="icons:my-location"></paper-fab>
+    <paper-fab class="my-location" icon="icons:my-location" onclick="_getLocation(event)"></paper-fab>
 
     <app-speed-dial id="speedDial" class="add-fab speed-dial" front-icon="icons:share" back-icon="icons:close" onclick="_openSpeedDial(event)">
       <div class="speed-dial-content">
@@ -93,11 +95,23 @@
       // Cancel on outside click.
       document.addEventListener('click', function (ev) {
         _cancelSpeedDial(ev);
+
+        ga('send', 'event', {
+          eventCategory: ev.target.tagName,
+          eventAction: 'click',
+          eventLabel: 'document cilck',
+        });
       });
 
       // Cancel on map drag.
       _map.addEventListener('google-map-dragstart', function (ev) {
         _cancelSpeedDial(ev);
+
+        ga('send', 'event', {
+          eventCategory: ev.target.tagName,
+          eventAction: 'google map dragstart',
+          eventLabel: 'google map dragstart',
+        });
       });
 
       // Unhide my-location.
@@ -113,7 +127,23 @@
 
       function _openSpeedDial (ev) {
         _speedDial.toggle();
+
+        ga('send', 'event', {
+          eventCategory: ev.target.tagName === 'PAPER-FAB' ? ev.target.getAttribute('icon') : ev.target.tagName,
+          eventAction: 'click',
+          eventLabel: ev.target.tagName === 'PAPER-FAB' ? 'paper fab click' : 'speed dial click',
+        });
+      }
+
+      function _getLocation (ev) {
+        ga('send', 'event', {
+          eventCategory: ev.target.getAttribute('icon'),
+          eventAction: 'click',
+          eventLabel: 'get location click'
+        });
       }
     </script>
+
+    <demo-ga></demo-ga>
   </body>
 </html>

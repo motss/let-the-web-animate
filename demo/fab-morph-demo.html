@@ -7,6 +7,7 @@
     <script> window.Polymer = { lazyRegister: !0, useNativeCSSProperties: !0, dom: 'shadow' }; </script>
 
     <link rel="import" href="../fab-morph-demo-icons.html">
+    <link rel="import" href="demo-ga.html">
 
     <link rel="import" href="../../iron-flex-layout/iron-flex-layout.html">
     <link rel="import" href="../../iron-image/iron-image.html">
@@ -349,7 +350,7 @@
       var _pauseButton = document.querySelector('.pause-button');
       var _ripple = document.querySelector('.ripple');
 
-      function _togglePlayback () {
+      function _togglePlayback (ev) {
         var _isPlaying = _content.hasAttribute('playing');
         var _shouldHidePlayButton = !_playButton.hasAttribute('playing');
 
@@ -370,6 +371,12 @@
           document.documentElement.style.setProperty('--pause-ripple-scale', 'scale3d(' + _scaleDown + ', ' + _scaleDown + ', 1)');
           _runPauseAnimation(_isPlaying, _shouldHidePlayButton, _scaleDown);
         }
+
+        ga('send', 'event', {
+          eventCategory: ev.target.tagName,
+          eventAction: 'click',
+          eventLabel: 'toggle playback',
+        });
       }
 
       function _setTransformOriginScale (_innerWidth) {
@@ -629,5 +636,7 @@
       }
 
     </script>
+
+    <demo-ga></demo-ga>
   </body>
 </html>

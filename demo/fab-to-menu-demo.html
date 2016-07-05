@@ -6,6 +6,7 @@
     <title>Fab to fullscreen dialog demo</title>
     <script> window.Polymer = { lazyRegister: !0, useNativeCSSProperties: !0, dom: 'shadow' }; </script>
 
+    <link rel="import" href="demo-ga.html">
     <link rel="import" href="../fab-to-menu-demo-icons.html">
     <link rel="import" href="../app-fab-dialog.html">
 
@@ -216,6 +217,8 @@
 
       _fabContent.addEventListener('iron-select', function () {
         _fabDialog.close();
+
+        ga('send', )
       });
 
       function _openFabDialog () {
@@ -299,5 +302,7 @@
         }
       }
     </script>
+
+    <demo-ga></demo-ga>
   </body>
 </html>
