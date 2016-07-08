@@ -16,7 +16,7 @@
     <link rel="import" href="../../paper-styles/shadow.html">
     <link rel="import" href="../../paper-fab/paper-fab.html">
     <link rel="import" href="../../paper-slider/paper-slider.html">
-    <link rel="import" href="web-animation.html">
+    <link rel="import" href="../web-animation.html">
   </head>
   <body>
     <style is="custom-style">
@@ -298,7 +298,7 @@
             <div class="flex align-center">
               <div class="ripple"></div>
 
-              <paper-icon-button class="pause-button" alt="pause" icon="icons:pause" onclick="_togglePlayback()"></paper-icon-button>
+              <paper-icon-button class="pause-button" alt="pause" icon="icons:pause" onclick="_togglePlayback(event)"></paper-icon-button>
             </div>
             <paper-icon-button class="fast-forward" alt="fast forward" icon="icons:fast-forward"></paper-icon-button>
           </div>
@@ -329,7 +329,7 @@
       </div>
     </div>
 
-    <paper-fab class="play-button" alt="play" icon="icons:play-arrow" onclick="_togglePlayback()"></paper-fab>
+    <paper-fab class="play-button" alt="play" icon="icons:play-arrow" onclick="_togglePlayback(event)"></paper-fab>
 
     <script>
       var _innerWidth = window.innerWidth;
@@ -374,7 +374,7 @@
 
         ga('send', 'event', {
           eventCategory: ev.target.tagName,
-          eventAction: 'click',
+          eventAction: ev.type,
           eventLabel: 'toggle playback',
         });
       }

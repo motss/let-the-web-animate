@@ -5,8 +5,7 @@
 <link rel="import" href="../paper-fab/paper-fab.html">
 <link rel="import" href="../paper-behaviors/paper-button-behavior.html">
 
-<link rel="import" href="../neon-animation/neon-animations.html">
-<link rel="import" href="../neon-animation/neon-animation-runner-behavior.html">
+<link rel="import" href="web-animation.html">
 
 <dom-module id="app-speed-dial">
   <template>
@@ -27,6 +26,7 @@
         user-select: none;
         -webkit-tap-highlight-color: rgba(0,0,0,0);
         z-index: 103;
+        will-change: transform;
 
         @apply(--shadow-elevation-12dp);
         @apply(--app-speed-dial);
@@ -49,6 +49,14 @@
 
       :host([opened]) {
         z-index: 112;
+      }
+
+      * {
+        box-sizing: border-box;
+      }
+
+      .app-speed-dial-container {
+        position: relative;
       }
 
       iron-icon {
@@ -93,28 +101,26 @@
         left: var(--app-speed-dial-content-left, -4px);
         bottom: var(--app-speed-dial-content-bottom, 64px);
       }
-      :host([opened]) ::content > .speed-dial-content {
-        opacity: 1;
+      :host([opened]) ::content > .speed-dial-content > * {
         z-index: 103;
         pointer-events: auto;
       }
+      :host([opened]) ::content > .speed-dial-content {
+        opacity: 1;
+      }
       ::content > .speed-dial-content > * {
-        z-index: 103;
+        z-index: 0;
+        opacity: 0;
         margin: 12px;
+        pointer-events: none;
+        will-change: transform;
       }
 
       :host(.keyboard-focus) {
         background-color: var(--app-speed-dial-keyboard-focus, #880e4f);
       }
 
-      * {
-        box-sizing: border-box;
-      }
-
-      .app-speed-dial-container {
-        position: relative;
-      }
-
+      /* scrim */
       .scrim {
         position: fixed;
         top: 0;
@@ -148,7 +154,6 @@
 
       behaviors: [
         Polymer.PaperButtonBehavior,
-        Polymer.NeonAnimationRunnerBehavior,
       ],
 
       properties: {
@@ -176,7 +181,6 @@
           value: !1,
           notify: !0,
         },
-        animationConfig: Object,
         noScrim: {
           type: Boolean,
           value: !0,
@@ -184,7 +188,8 @@
         },
 
         _shouldShowLabel: Boolean,
-        _children: Array,
+        _entryAnimation: Object,
+        _exitAnimation: Object,
       },
 
       observers: [
@@ -193,44 +198,31 @@
       ],
 
       ready: function () {
-
         var _children = this.getEffectiveChildren();
 
         if (_children.length > 0) {
-          var _animationConfig = {
-            'entry': [{
-              name: 'cascaded-animation',
-              animation: 'fade-in-animation',
-              nodeDelay: 30,
-              timing: {
-                duration: 200
-              },
-            }, {
-              name: 'cascaded-animation',
-              animation: 'transform-animation',
-              transformFrom: 'translate3d(0, 30%, 0)',
-              transformTo: 'none',
-              nodeDelay: 30,
-              timing: {
-                duration: 200
-              },
-            }],
-            'exit': [{
-              name: 'fade-out-animation',
-              timing: {
-                duration: 200
-              },
-            }]
-          };
+          var _exitNode = _children[0];
+          var _entryNode = Array.prototype.slice.call(_children[0].children).reverse();
+          var _opt = [
+            { transform: 'translate3d(0, 30%, 0)', opacity: 0 },
+            { transform: 'none', opacity: 1 },
+          ];
+          var _optDelay = 30;
+          var _groupEntry = [];
+          for (var i = 0, len = _entryNode.length; i < len; i++) {
+            _groupEntry.push(new KeyframeEffect(_entryNode[i], _opt, {
+              delay: _optDelay * i,
+              duration: 200,
+              fill: 'forwards',
+            }));
+          }
 
-          _animationConfig.exit[0].node = _children[0];
-
-          _children = Array.prototype.slice.call(_children[0].children).reverse();
-          _animationConfig.entry[0].nodes = _children;
-          _animationConfig.entry[1].nodes = _children;
-
-          this.set('_children', _children);
-          this.set('animationConfig', _animationConfig);
+          this._entryAnimation = new GroupEffect(_groupEntry);
+          this._exitAnimation = new KeyframeEffect(_exitNode, [
+            { opacity: 1 }, { opacity: 0 }
+          ], {
+            duration: 200,
+          });
         }
       },
 
@@ -253,6 +245,7 @@
       /**
        * Render icon only only when are the icon and src are given.
        * @param {String, String} icon, src.
+       * @return {Boolean} presence of icon(s).
        */
       _shouldRenderIcon: function (_icon, _src) {
         var _hasIcon = (_icon && _icon.length > 0) || (_src && _src.length > 0);
@@ -270,9 +263,6 @@
       },
 
       toggle: function (_open) {
-        // Always cancel previoius animation first.
-        this.cancelAnimation();
-
         // Spamming enter or space keys frantically will freeze the element.
         this.debounce('_toggle', function () {
           var _opened = typeof _open === 'undefined' ? !this.opened : _open;
@@ -290,7 +280,24 @@
               this._openScrim(_opened);
             }
 
-            this.playAnimation(_opened ? 'entry' : 'exit');
+            var _speedDialTimeline = document.timeline.play(_opened ? this._entryAnimation : this._exitAnimation);
+            var _boundGetRipple = this.getRipple.bind(this);
+            _speedDialTimeline.finished.then(function () {
+              // DUe to nested paper-ripple, unable to remove all ripples.
+              // Thus causing performance issues as the ripples will keep
+              // accmulate if at least one is not removed from previous
+              // transition.
+              var _getRipple = _boundGetRipple();
+              if (_getRipple.animating && _getRipple.ripples.length > 0) {
+                if (_getRipple.length > 1) {
+                  for (var i = 0, len = _getRipple.length; i < len; i++) {
+                    _getRipple.removeRipple(_getRipple.ripples[i]);
+                  }
+                }else {
+                  _getRipple.removeRipple(_getRipple.ripples[0]);
+                }
+              }
+            });
           }
         }, 100);
       },

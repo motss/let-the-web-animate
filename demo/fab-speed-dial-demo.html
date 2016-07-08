@@ -63,6 +63,7 @@
       }
       .speed-dial {
         background-color: #4086f4;
+        --paper
       }
       .speed-dial > .speed-dial-content > paper-fab {
         background-color: #fff;
@@ -98,7 +99,7 @@
 
         ga('send', 'event', {
           eventCategory: ev.target.tagName,
-          eventAction: 'click',
+          eventAction: ev.type,
           eventLabel: 'document cilck',
         });
       });
@@ -109,7 +110,7 @@
 
         ga('send', 'event', {
           eventCategory: ev.target.tagName,
-          eventAction: 'google map dragstart',
+          eventAction: ev.type,
           eventLabel: 'google map dragstart',
         });
       });
@@ -130,7 +131,7 @@
 
         ga('send', 'event', {
           eventCategory: ev.target.tagName === 'PAPER-FAB' ? ev.target.getAttribute('icon') : ev.target.tagName,
-          eventAction: 'click',
+          eventAction: ev.type,
           eventLabel: ev.target.tagName === 'PAPER-FAB' ? 'paper fab click' : 'speed dial click',
         });
       }
@@ -138,7 +139,7 @@
       function _getLocation (ev) {
         ga('send', 'event', {
           eventCategory: ev.target.getAttribute('icon'),
-          eventAction: 'click',
+          eventAction: ev.type,
           eventLabel: 'get location click'
         });
       }

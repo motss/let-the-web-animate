@@ -132,7 +132,7 @@
       <div class="inbox-list"></div>
     </div>
 
-    <paper-fab id="addFab" class="add-fab" icon="icons:add" onclick="_openFabDialog()"></paper-fab>
+    <paper-fab id="addFab" class="add-fab" icon="icons:add" onclick="_openFabDialog(event)"></paper-fab>
 
     <app-fab-dialog id="fabDialog" no-outside-scrolling with-backdrop>
       <div id="fabRipple" class="ripple-container" tabindex="-1"></div>
@@ -215,13 +215,17 @@
         _addFab.focus();
       });
 
-      _fabContent.addEventListener('iron-select', function () {
+      _fabContent.addEventListener('iron-select', function (ev) {
         _fabDialog.close();
 
-        ga('send', )
+        ga('send', 'event', {
+          eventCategory: ev.target.tagName,
+          eventAction: ev.type,
+          eventLabel: ev.target.selected + ' is selected',
+        });
       });
 
-      function _openFabDialog () {
+      function _openFabDialog (ev) {
         var _isWideLayout = window.matchMedia('(min-width: 600px)').matches;
         var _translateY = 30;
         var _scaleUpY = 50;
@@ -299,6 +303,12 @@
           };
 
           _fabDialog.open();
+
+          ga('send', 'event', {
+            eventCategory: ev.target.tagName,
+            eventAction: ev.type,
+            eventLabel: 'fab dialog open',
+          });
         }
       }
     </script>
