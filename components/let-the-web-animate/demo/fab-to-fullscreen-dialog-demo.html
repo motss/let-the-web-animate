@@ -1,0 +1,278 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, minimum-scale=1.0, initial-scale=1.0, user-scalable=no">
+    <title>Fab to fullscreen dialog demo</title>
+    <script> window.Polymer = { lazyRegister: !0, useNativeCSSProperties: !0, dom: 'shadow' }; </script>
+
+    <link rel="import" href="demo-ga.html">
+    <link rel="import" href="../fab-to-fullscreen-dialog.html">
+    <link rel="import" href="../fab-to-fullscreen-dialog-icons.html">
+
+    <link rel="import" href="../../iron-flex-layout/iron-flex-layout.html">
+    <link rel="import" href="../../iron-icon/iron-icon.html">
+    <link rel="import" href="../../iron-image/iron-image.html">
+
+    <link rel="import" href="../../paper-styles/shadow.html">
+    <link rel="import" href="../../paper-icon-button/paper-icon-button.html">
+    <link rel="import" href="../../paper-checkbox/paper-checkbox.html">
+  </head>
+  <body>
+    <style is="custom-style">
+      body {
+        font-family: 'Roboto', 'Noto', sans-serif;
+        font-size: 14px;
+        color: #212121;
+        box-sizing: border-box;
+        padding: 0;
+        margin: 0;
+
+        background-color: #e0e0e0;
+      }
+
+      * {
+        box-sizing: border-box;
+      }
+
+      .app-toolbar {
+        height: 56px;
+        padding: 0 16px;
+
+        @apply(--layout-horizontal);
+        @apply(--layout-center);
+      }
+      .app-toolbar > .main-title {
+        margin-left: 24px;
+        font-size: 24px;
+      }
+      .app-toolbar > .search {
+        margin-left: auto;
+        margin-right: 0;
+      }
+
+      .content {
+        /*max-height: calc(100vh - 56px - 8px);*/
+        /*max-height: calc(100vh + 256px);*/
+        max-width: calc(100vw - (var(--gutter-width, 8px) * 2));
+        margin-top: var(--gutter-width, 8px);
+        margin-left: var(--gutter-width, 8px);
+
+        @apply(--layout-vertical);
+        @apply(--layout-wrap);
+      }
+
+      .paper-card {
+        border-radius: 3px;
+        margin-right: var(--gutter-width, 8px);
+        margin-bottom: var(--gutter-width, 8px);
+        max-width: calc((100vw - (var(--gutter-width, 8px) * (var(--grid-column, 2) + 1))) / var(--grid-column, 2));
+
+        @apply(--layout-vertical);
+        @apply(--shadow-elevation-8dp);
+      }
+      .paper-card > .card-content {
+        padding: 16px;
+      }
+      .paper-card > .card-action {
+        border-top: 1px solid rgba(255, 255, 255, .2);
+        padding: 7px 8px 8px 8px;
+
+        @apply(--layout-horizontal);
+        @apply(--layout-center);
+      }
+      .paper-card iron-image {
+        height: 166px;
+        width: 100%;
+        max-width: calc((100vw - (var(--gutter-width, 8px) * var(--grid-column, 2))) / var(--grid-column, 2));
+      }
+
+      .cyan {
+        background-color: #00bcd4;
+        color: #fff;
+      }
+      .cyan > .card-content,
+      .blue-grey > .card-content {
+        font-size: 32px;
+      }
+      .cyan iron-icon,
+      .blue-grey iron-icon,
+      .dark-blue-grey iron-icon {
+        margin-left: auto;
+        margin-right: 0;
+      }
+
+      .indigo {
+        background-color: #3d51b4;
+        color: #fff;
+      }
+      /* Override ul default styling */
+      .indigo ul {
+        -webkit-padding-start: 8px;
+        -webkit-margin-after: 0;
+      }
+      .indigo li {
+        padding-bottom: 6px;
+      }
+      .indigo li:last-of-type {
+        padding-bottom: 0px;
+      }
+
+      .blue-grey {
+        background-color: #607d89;
+        color: #fff;
+      }
+
+      .yellow {
+        background-color: #fdea3c;
+        color: #757575;
+        min-height: 12px;
+      }
+
+      .dark-blue-grey {
+        background-color: #465a64;
+        color: #fff;
+        font-size: 16px;
+      }
+      .dark-blue-grey .label {
+        padding-bottom: 16px;
+      }
+      .dark-blue-grey paper-checkbox {
+        margin-bottom: 8px;
+
+        --paper-checkbox-unchecked-color: #fff;
+        --paper-checkbox-unchecked-ink-color: #fff;
+        --paper-checkbox-checked-color: #fff;
+        --paper-checkbox-checked-ink-color: #fff;
+        --paper-checkbox-checkmark-color: #465a64;
+        --paper-checkbox-label-color: #fff;
+        --paper-checkbox-label-checked-color: #fff;
+        --paper-checkbox-label-spacing: 16px;
+      }
+
+      .deep-orange {
+        background-color: #fa6e43;
+        color: #fff;
+      }
+
+      @media (min-width: 360px) {
+        .content {
+          max-height: calc(100vh + 128px);
+        }
+      }
+
+      @media (min-width: 412px) {
+        .content {
+          max-height: calc(100vh + 0px);
+        }
+      }
+
+      @media (min-width: 600px) {
+        .content {
+          max-width: 412px;
+          max-height: 732px;
+        }
+      }
+
+    </style>
+
+    <div class="app-toolbar">
+      <paper-icon-button alt="menu" icon="icons:menu"></paper-icon-button>
+      <div class="main-title">Notes</div>
+      <paper-icon-button alt="search" class="search" icon="icons:search"></paper-icon-button>
+    </div>
+
+    <div class="content">
+
+      <div class="paper-card cyan">
+        <div class="card-content"> Call Jennifer </div>
+        <div class="card-action">
+          <div> March 19, 2014 </div>
+          <iron-icon alt="call reminder" icon="icons:call"></iron-icon>
+        </div>
+      </div>
+
+      <div class="paper-card indigo">
+        <div class="card-content">
+          <div>
+            To bring:
+          </div>
+
+          <ul>
+            <li>camping gear</li>
+            <li>lantern</li>
+            <li>smores</li>
+            <li>extra blankets</li>
+            <li>towel for pup</li>
+            <li>warm socks</li>
+            <li>first aid kit</li>
+          </ul>
+        </div>
+      </div>
+
+      <div class="paper-card blue-grey">
+        <div class="card-content"> Yuna tickets on sale 6/ 24 </div>
+        <div class="card-action">
+          <div> May 24, 2014 </div>
+          <iron-icon alt="event reminder" icon="icons:event"></iron-icon>
+        </div>
+      </div>
+
+      <div class="paper-card yellow"></div>
+
+      <div class="paper-card dark-blue-grey">
+        <div class="card-content">
+          <div class="label"> Groceries: </div>
+          <div class="">
+            <paper-checkbox>almond milk</paper-checkbox>
+            <paper-checkbox>coconut water</paper-checkbox>
+            <paper-checkbox>cucumber</paper-checkbox>
+            <paper-checkbox>green apples</paper-checkbox>
+          </div>
+        </div>
+
+        <div class="card-action">
+          <div> Campbell </div>
+          <iron-icon alt="location reminder" icon="icons:place"></iron-icon>
+        </div>
+      </div>
+
+      <div class="paper-card blue-grey">
+        <div class="card-content"> Clean desk </div>
+      </div>
+
+      <div class="paper-card deep-orange">
+        <iron-image src="https://firebasestorage.googleapis.com/v0/b/hosted-images.appspot.com/o/3867565737_d5cc45682f_b.jpg?alt=media&token=d46f4026-f260-45f1-b7d5-9a5490237e5e" alt="Morning latte at Sightglass" preload fade sizing="cover" placeholder="data:image/jpeg;base64,/9j/4AAQSkZJRgABAQEASABIAAD/4QAiRXhpZgAATU0AKgAAAAgAAQESAAMAAAABAAEAAAAAAAD//gANQXBwbGVNYXJrCgD/4gVYSUNDX1BST0ZJTEUAAQEAAAVIYXBwbAIgAABzY25yUkdCIFhZWiAH0wAHAAEAAAAAAABhY3NwQVBQTAAAAABhcHBsAAAAAAAAAAAAAAAAAAAAAAAA9tYAAQAAAADTLWFwcGwAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAtyWFlaAAABCAAAABRnWFlaAAABHAAAABRiWFlaAAABMAAAABR3dHB0AAABRAAAABRjaGFkAAABWAAAACxyVFJDAAABhAAAAA5nVFJDAAABhAAAAA5iVFJDAAABhAAAAA5kZXNjAAAE2AAAAG5jcHJ0AAAElAAAAEFkc2NtAAABlAAAAv5YWVogAAAAAAAAdEsAAD4dAAADy1hZWiAAAAAAAABacwAArKYAABcmWFlaIAAAAAAAACgYAAAVVwAAuDNYWVogAAAAAAAA81IAAQAAAAEWz3NmMzIAAAAAAAEMQgAABd7///MmAAAHkgAA/ZH///ui///9owAAA9wAAMBsY3VydgAAAAAAAAABAjMAAG1sdWMAAAAAAAAADwAAAAxlblVTAAAAJAAAAp5lc0VTAAAALAAAAUxkYURLAAAANAAAAdpkZURFAAAALAAAAZhmaUZJAAAAKAAAAMRmckZVAAAAPAAAAsJpdElUAAAALAAAAnJubE5MAAAAJAAAAg5ub05PAAAAIAAAAXhwdEJSAAAAKAAAAkpzdlNFAAAAKgAAAOxqYUpQAAAAHAAAARZrb0tSAAAAGAAAAjJ6aFRXAAAAGgAAATJ6aENOAAAAFgAAAcQASwBhAG0AZQByAGEAbgAgAFIARwBCAC0AcAByAG8AZgBpAGkAbABpAFIARwBCAC0AcAByAG8AZgBpAGwAIABmAPYAcgAgAEsAYQBtAGUAcgBhMKsw4TDpACAAUgBHAEIAIDDXMO0w1TChMKQw62V4T012+GpfACAAUgBHAEIAIIJyX2ljz4/wAFAAZQByAGYAaQBsACAAUgBHAEIAIABwAGEAcgBhACAAQwDhAG0AYQByAGEAUgBHAEIALQBrAGEAbQBlAHIAYQBwAHIAbwBmAGkAbABSAEcAQgAtAFAAcgBvAGYAaQBsACAAZgD8AHIAIABLAGEAbQBlAHIAYQBzdvhnOgAgAFIARwBCACBjz4/wZYdO9gBSAEcAQgAtAGIAZQBzAGsAcgBpAHYAZQBsAHMAZQAgAHQAaQBsACAASwBhAG0AZQByAGEAUgBHAEIALQBwAHIAbwBmAGkAZQBsACAAQwBhAG0AZQByAGHOdLpUt3wAIABSAEcAQgAg1QS4XNMMx3wAUABlAHIAZgBpAGwAIABSAEcAQgAgAGQAZQAgAEMA4gBtAGUAcgBhAFAAcgBvAGYAaQBsAG8AIABSAEcAQgAgAEYAbwB0AG8AYwBhAG0AZQByAGEAQwBhAG0AZQByAGEAIABSAEcAQgAgAFAAcgBvAGYAaQBsAGUAUAByAG8AZgBpAGwAIABSAFYAQgAgAGQAZQAgAGwgGQBhAHAAcABhAHIAZQBpAGwALQBwAGgAbwB0AG8AAHRleHQAAAAAQ29weXJpZ2h0IDIwMDMgQXBwbGUgQ29tcHV0ZXIgSW5jLiwgYWxsIHJpZ2h0cyByZXNlcnZlZC4AAAAAZGVzYwAAAAAAAAATQ2FtZXJhIFJHQiBQcm9maWxlAAAAAAAAAAAAAAATQ2FtZXJhIFJHQiBQcm9maWxlAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAP/+ABxjbXAzLjEwLjMuM0xxNCAweDJhYzQxYjJjAP/bAEMAAgEBAgEBAgICAgICAgIDBQMDAwMDBgQEAwUHBgcHBwYHBwgJCwkICAoIBwcKDQoKCwwMDAwHCQ4PDQwOCwwMDP/bAEMBAgICAwMDBgMDBgwIBwgMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDP/AABEIAAgACwMBIgACEQEDEQH/xAAfAAABBQEBAQEBAQAAAAAAAAAAAQIDBAUGBwgJCgv/xAC1EAACAQMDAgQDBQUEBAAAAX0BAgMABBEFEiExQQYTUWEHInEUMoGRoQgjQrHBFVLR8CQzYnKCCQoWFxgZGiUmJygpKjQ1Njc4OTpDREVGR0hJSlNUVVZXWFlaY2RlZmdoaWpzdHV2d3h5eoOEhYaHiImKkpOUlZaXmJmaoqOkpaanqKmqsrO0tba3uLm6wsPExcbHyMnK0tPU1dbX2Nna4eLj5OXm5+jp6vHy8/T19vf4+fr/xAAfAQADAQEBAQEBAQEBAAAAAAAAAQIDBAUGBwgJCgv/xAC1EQACAQIEBAMEBwUEBAABAncAAQIDEQQFITEGEkFRB2FxEyIygQgUQpGhscEJIzNS8BVictEKFiQ04SXxFxgZGiYnKCkqNTY3ODk6Q0RFRkdISUpTVFVWV1hZWmNkZWZnaGlqc3R1dnd4eXqCg4SFhoeIiYqSk5SVlpeYmZqio6Slpqeoqaqys7S1tre4ubrCw8TFxsfIycrS09TV1tfY2dri4+Tl5ufo6ery8/T19vf4+fr/2gAMAwEAAhEDEQA/AMb9uf8AZgvP2ZNJ8M/ELxdpPiDwt4DvPEtn4TmuLG5nujNANKvbqS8S2ELbRPOkai4CuIxBhflZ2r8zvibcanq/j/Vrrw/qS32iz3BezuNST7HdSxnoXiZMqf5jBHBFFFfAPEVsHThVpzbbSTu7pvV39dbX7JLofdUcPRxkpUqsEknpZWfRWv2627ts/9k="></iron-image>
+
+        <div class="card-content">
+          <div class=""> New exhibition at D </div>
+          <div class=""> "Food To Love" </div>
+          <div class=""> 6.25.14-06.26.14 </div>
+          <div class=""> 74D Valencia St. </div>
+        </div>
+      </div>
+
+      <fab-to-fullscreen-dialog></fab-to-fullscreen-dialog>
+    </div>
+
+    <script>
+      var _fabToFullscreenDialog = document.querySelector('fab-to-fullscreen-dialog');
+
+      _fabToFullscreenDialog.addEventListener('open-fullscreen-dialog', function (ev) {
+        ga('send', 'event', {
+          eventCategory: ev.detail.target,
+          eventAction: ev.detail.type,
+          eventLabel: 'fullscreen dialog tapped to open',
+        });
+      });
+      _fabToFullscreenDialog.addEventListener('close-fullscreen-dialog', function (ev) {
+        ga('send', 'event', {
+          eventCategory: ev.detail.target,
+          eventAction: ev.detail.type,
+          eventLabel: 'fullscreen dialog tapped to close',
+        });
+      });
+    </script>
+    <demo-ga></demo-ga>
+  </body>
+</html>

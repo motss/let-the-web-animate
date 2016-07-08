@@ -1,0 +1,333 @@
+<link rel="import" href="../polymer/polymer.html">
+<link rel="import" href="fab-to-fullscreen-dialog-icons.html">
+<link rel="import" href="app-speed-dial.html">
+
+<link rel="import" href="../paper-dialog/paper-dialog.html">
+<link rel="import" href="../paper-icon-button/paper-icon-button.html">
+<link rel="import" href="../paper-input/paper-input.html">
+<link rel="import" href="../paper-item/paper-icon-item.html">
+<link rel="import" href="../paper-item/paper-item-body.html">
+
+<link rel="import" href="../neon-animation/neon-animations.html">
+
+<dom-module id="fab-to-fullscreen-dialog">
+  <template>
+    <style>
+      :host {
+        display: block;
+        box-sizing: border-box;
+
+        --ripple-container-width: 56px;
+        --ripple-container-height: 56px;
+      }
+
+      * {
+        box-sizing: border-box;
+      }
+
+      .fab-to-fullscreen-dialog-container {
+        position: relative;
+      }
+
+      .fullscreen-fab {
+        /*background-color: #4086f4;*/
+        color: #757575;
+        background-color: #f0fc53;
+        right: 16px;
+        bottom: 16px;
+        pointer-events: auto;
+        transform: scale3d(1, 1, 1);
+      }
+      .fullscreen-fab.opened {
+        transform: scale3d(0, 0, 0);
+        pointer-events: none;
+        /*display: none;*/
+      }
+      #fullscreenDialog.fullscreen-dialog {
+        overflow: hidden;
+        position: fixed;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        margin: 0;
+      }
+      #fullscreenDialog.fullscreen-dialog.opened {
+        /*background-color: #4086f4;*/
+        background-color: #fff;
+      }
+      #fullscreenDialog.fullscreen-dialog.opened .ripple-container {
+        display: none;
+      }
+      #fullscreenDialog.fullscreen-dialog.opened .content-header {
+        background-color: #3f51b5;
+      }
+      #fullscreenDialog.fullscreen-dialog > * {
+        margin: 0;
+        padding: 0;
+      }
+
+      .ripple-container {
+        position: absolute;
+        border-radius: 50%;
+        width: var(--ripple-container-width);
+        height: var(--ripple-container-height);
+        top: var(--ripple-container-top, calc(100% * .2 - 56px - 16px));
+        right: 16px;
+
+        background-color: #3f51b5;
+      }
+
+      .content-header {
+        position: relative;;
+        height: 256px;
+        overflow: hidden;
+      }
+      .content-toolbar {
+        height: 56px;
+        width: 100%;
+        padding: 0 16px;
+
+        @apply(--layout-horizontal);
+        @apply(--layout-center);
+      }
+      .content-toolbar > paper-icon-button {
+        color: #fff;
+        --paper-icon-button-ink-color: #fff;
+      }
+      .content-toolbar > .more-options {
+        margin-left: auto;
+        margin-right: 0;
+      }
+      .header-content {
+        padding-left: 56px;
+      }
+      .header-content > paper-input {
+        padding: 16px;
+        --paper-input-container-input: {
+          font-size: 24px;
+        };
+        --paper-input-container-input-color: #fff;
+        --paper-input-container-label-focus: {
+          color: #fff;
+        };
+        --paper-input-container-underline-focus: {
+          margin-top: 8px;
+          background-color: #fff;
+        };
+        --paper-input-container-label: {
+          color: rgba(255, 255, 255, .5);
+          font-size: 32px;
+        };
+        --paper-input-container-underline: {
+          margin-top: 8px;
+          background-color: rgba(255, 255, 255, .5);
+        };
+      }
+      .header-content > paper-input.description {
+        --paper-input-container-label: {
+          color: rgba(255, 255, 255, .5);
+          font-size: 14px;
+        };
+        --paper-input-container-underline-focus: {
+          background-color: rgba(255, 255, 255, .5);
+        };
+        --paper-input-container-underline: {
+          background-color: rgba(255, 255, 255, .5);
+        };
+      }
+      .fullscreen-content paper-icon-item {
+        --paper-item-icon: {
+          color: #757575;
+        };
+      }
+      .fullscreen-content paper-item-body {
+        --paper-item-body-secondary: {
+          color: #757575;
+        };
+      }
+    </style>
+
+    <div class="fab-to-fullscreen-dialog-container">
+      <app-speed-dial id="fullscreenFab" class="fullscreen-fab visible" front-icon="icons:add" back-icon="icons:none" on-tap="_openFullscreenDialog"></app-speed-dial>
+    </div>
+
+    <paper-dialog id="fullscreenDialog" class="fullscreen-dialog" opened="{{_opened}}" on-neon-animation-finish="_animationFinish" on-iron-overlay-opened="_focusInput">
+      <div class="content-header">
+        <div id="fullscreenRipple" class="ripple-container"></div>
+
+        <div id="fullscreenToolbar" class="content-toolbar">
+          <paper-icon-button alt="close fullscreen dialog" icon="icons:arrow-back" on-tap="_closeFullscreenDialog"></paper-icon-button>
+          <paper-icon-button class="more-options" alt="more options" icon="icons:more-vert"></paper-icon-button>
+        </div>
+
+        <div class="header-content">
+          <paper-input id="autofocus" label="Title"></paper-input>
+          <paper-input class="description" label="Description"></paper-input>
+        </div>
+      </div>
+
+      <div id="fullscreenContent" class="fullscreen-content">
+        <paper-icon-item>
+          <iron-icon icon="icons:label" item-icon></iron-icon>
+          <paper-item-body two-line>
+            <div> Label </div>
+            <div secondary> None </div>
+          </paper-item-body>
+        </paper-icon-item>
+        <paper-icon-item>
+          <iron-icon icon="icons:schedule" item-icon></iron-icon>
+          <paper-item-body two-line>
+            <div> Due date </div>
+            <div secondary> February 20, 2014 </div>
+          </paper-item-body>
+        </paper-icon-item>
+        <paper-icon-item>
+          <iron-icon icon="icons:person" item-icon></iron-icon>
+          <paper-item-body two-line>
+            <div> Add someone </div>
+            <div secondary> Attendees </div>
+          </paper-item-body>
+        </paper-icon-item>
+        <paper-icon-item>
+          <iron-icon icon="icons:insert-drive-file" item-icon></iron-icon>
+          <paper-item-body two-line>
+            <div> Files </div>
+            <div secondary> </div>
+          </paper-item-body>
+        </paper-icon-item>
+        <paper-icon-item>
+          <iron-icon icon="icons:comment" item-icon></iron-icon>
+          <paper-item-body two-line>
+            <div> Comment </div>
+            <div secondary> </div>
+          </paper-item-body>
+        </paper-icon-item>
+      </div>
+    </paper-dialog>
+  </template>
+  <script>
+    (function() {
+      'use strict';
+
+      Polymer({
+        is: 'fab-to-fullscreen-dialog',
+
+        properties: {},
+
+        ready: function () {
+          // HACK: Re-position ripple container based on window.innerWidth.
+          this.customStyle['--ripple-container-top'] = (window.innerHeight * .2 - 56 - 16) + 'px';
+          this.updateStyles();
+        },
+
+        _openFullscreenDialog: function (ev) {
+          var _target = Polymer.dom(ev).localTarget;
+          var _fullscreenDialog = this.$.fullscreenDialog;
+
+          if (_fullscreenDialog) {
+            // var _scaleUp = Math.sqrt(Math.pow(window.innerHeight, 2) + Math.pow(window.innerWidth, 2)) / 28;
+            var _scaleUp = Math.ceil(Math.sqrt(Math.pow(256, 2) + Math.pow(window.innerWidth, 2)) / 28);
+
+            _fullscreenDialog.animationConfig = {
+              'entry': [{
+                name: 'fade-out-animation',
+                node: this.$.fullscreenFab,
+                timing: {
+                  duration: 0
+                },
+              }, {
+                name: 'transform-animation',
+                transformFrom: 'none',
+                transformTo: 'scale3d(' + _scaleUp + ', ' + _scaleUp + ', 1)',
+                timing: {
+                  duration: 300,
+                },
+                node: this.$.fullscreenRipple
+              }, {
+                name: 'transform-animation',
+                transformFrom: 'translate3d(0, 80%, 0)',
+                transformTo: 'none',
+                timing: {
+                  delay: 80,
+                  duration: 300,
+                },
+                node: _fullscreenDialog,
+              }, {
+                name: 'fade-in-animation',
+                node: this.$.fullscreenContent,
+                timing: {
+                  delay: 200,
+                  duration: 300
+                }
+              }, {
+                name: 'fade-in-animation',
+                node: this.$.fullscreenToolbar,
+                timing: {
+                  delay: 200,
+                  duration: 300
+                }
+              }],
+              'exit': [{
+                name: 'transform-animation',
+                transformFrom: 'none',
+                transformTo: 'translate3d(0, 100%, 0)',
+                timing: {
+                  duration: 300,
+                },
+                node: _fullscreenDialog,
+              }]
+            };
+
+            _target.open();
+            _fullscreenDialog.open();
+
+            this.fire('open-fullscreen-dialog', {
+              target: Polymer.dom(ev).localTarget.tagName,
+              type: ev.type,
+            });
+          }
+        },
+        _closeFullscreenDialog: function (ev) {
+          var _fullscreenDialog = this.$.fullscreenDialog;
+
+          if (_fullscreenDialog) {
+            _fullscreenDialog.close();
+
+            this.fire('close-fullscreen-dialog', {
+              target: Polymer.dom(ev).localTarget.tagName,
+              type: ev.type,
+            });
+          }
+        },
+
+        _animationFinish: function () {
+          this.toggleClass('opened', this._opened, this.$.fullscreenDialog);
+
+          // HACK: Need some delay to toggle class on the fab.
+          if (!this._opened) {
+            this.async(function () {
+              this.$.fullscreenFab.style.transitionDuration = '.3s';
+              this.$.fullscreenFab.style.transitionProperty = 'transform';
+              this.toggleClass('opened', this._opened, this.$.fullscreenFab);
+              this.$.fullscreenFab.close();
+            }, 300);
+          }else {
+            this.$.fullscreenFab.style.transitionDuration = '0s';
+            this.$.fullscreenFab.style.transitionProperty = '';
+            this.toggleClass('opened', this._opened, this.$.fullscreenFab);
+          }
+        },
+
+        _focusInput: function () {
+          var _autofocus = this.$.autofocus;
+
+          if (_autofocus) {
+            _autofocus.focus();
+          }
+        },
+
+      });
+    })();
+  </script>
+</dom-module>

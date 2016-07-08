@@ -1,0 +1,328 @@
+<link rel="import" href="../polymer/polymer.html">
+
+<link rel="import" href="../iron-icon/iron-icon.html">
+
+<link rel="import" href="../paper-fab/paper-fab.html">
+<link rel="import" href="../paper-behaviors/paper-button-behavior.html">
+
+<link rel="import" href="web-animation.html">
+
+<dom-module id="app-speed-dial">
+  <template>
+    <style>
+      :host {
+        display: block;
+        box-sizing: border-box;
+
+        position: fixed;
+        background-color: var(--app-speed-dial-background, #e91e63);
+        color: var(--app-speed-dial-color, #fff);
+        border-radius: 50%;
+        cursor: pointer;
+        height: 56px;
+        width: 56px;
+        outline: none;
+        padding: 16px;
+        user-select: none;
+        -webkit-tap-highlight-color: rgba(0,0,0,0);
+        z-index: 103;
+        will-change: transform;
+
+        @apply(--shadow-elevation-12dp);
+        @apply(--app-speed-dial);
+      }
+
+      :host([mini]) {
+        width: 40px;
+        height: 40px;
+        padding: 8px;
+
+        @apply(--app-speed-dial-mini);
+      }
+
+      :host([disabled]) {
+        color: var(--app-speed-dial-disabled-text, #9e9e9e);
+        background-color: var(--app-speed-dial-disabled-background, #e0e0e0);
+
+        @apply(--app-speed-dial-disabled);
+      }
+
+      :host([opened]) {
+        z-index: 112;
+      }
+
+      * {
+        box-sizing: border-box;
+      }
+
+      .app-speed-dial-container {
+        position: relative;
+      }
+
+      iron-icon {
+        opacity: 0;
+        position: absolute;
+
+        transition: opacity, transform .2s ease;
+      }
+      .front-icon {
+        transform: rotate3d(0, 0, 1, 90deg);
+        @apply(--app-speed-dial-front-icon);
+      }
+      .back-icon {
+        transform: rotate3d(0, 0, 1, 0deg);
+        @apply(--app-speed-dial-back-icon);
+      }
+      .front-icon.visible {
+        opacity: 1;
+        transform: rotate3d(0, 0, 1, 0deg);
+        @apply(--app-speed-dial-front-icon-visible);
+      }
+      .back-icon.visible {
+        opacity: 1;
+        transform: rotate3d(0, 0, 1, 90deg);
+        @apply(--app-speed-dial-back-icon-visible);
+      }
+
+      span {
+        width: 100%;
+        white-space: nowrap;
+        overflow: hidden;
+        text-overflow: ellipsis;
+        text-align: center;
+
+        @apply(--app-speed-dial-label);
+      }
+
+      ::content > .speed-dial-content {
+        position: fixed;
+        opacity: 0;
+        pointer-events: none;
+        left: var(--app-speed-dial-content-left, -4px);
+        bottom: var(--app-speed-dial-content-bottom, 64px);
+      }
+      :host([opened]) ::content > .speed-dial-content > * {
+        z-index: 103;
+        pointer-events: auto;
+      }
+      :host([opened]) ::content > .speed-dial-content {
+        opacity: 1;
+      }
+      ::content > .speed-dial-content > * {
+        z-index: 0;
+        opacity: 0;
+        margin: 12px;
+        pointer-events: none;
+        will-change: transform;
+      }
+
+      :host(.keyboard-focus) {
+        background-color: var(--app-speed-dial-keyboard-focus, #880e4f);
+      }
+
+      /* scrim */
+      .scrim {
+        position: fixed;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        background-color: rgba(0,0,0,.5);
+      }
+    </style>
+
+    <div class="app-speed-dial-container">
+      <template is="dom-if" if="[[_shouldRenderIcon(frontIcon, frontSrc)]]" restamp="true">
+        <iron-icon id="frontIcon" class="front-icon visible" src="[[frontSrc]]" icon="[[frontIcon]]"></iron-icon>
+      </template>
+
+      <template is="dom-if" if="[[_shouldRenderIcon(backIcon, backSrc)]]" restamp="true">
+        <iron-icon id="backIcon" class="back-icon" src="[[backSrc]]" icon="[[backIcon]]"></iron-icon>
+      </template>
+
+      <template is="dom-if" if="[[_shouldShowLabel]]" restamp="true" strip-whitespace>
+        <span>[[label]]</span>
+      </template>
+
+      <content select=".speed-dial-content"></content>
+    </div>
+
+  </template>
+  <script>
+    Polymer({
+      is: 'app-speed-dial',
+
+      behaviors: [
+        Polymer.PaperButtonBehavior,
+      ],
+
+      properties: {
+        frontIcon: {
+          type: String,
+          value: '',
+        },
+        frontSrc: {
+          type: String,
+          value: '',
+        },
+        backIcon: {
+          type: String,
+          value: '',
+        },
+        backSrc: {
+          type: String,
+          value: '',
+        },
+
+        mini: Boolean,
+        label: String,
+        opened: {
+          type: Boolean,
+          value: !1,
+          notify: !0,
+        },
+        noScrim: {
+          type: Boolean,
+          value: !0,
+          reflectToAttribute: !0
+        },
+
+        _shouldShowLabel: Boolean,
+        _entryAnimation: Object,
+        _exitAnimation: Object,
+      },
+
+      observers: [
+        '_labelChanged(label)',
+        '_miniChanged(mini)',
+      ],
+
+      ready: function () {
+        var _children = this.getEffectiveChildren();
+
+        if (_children.length > 0) {
+          var _exitNode = _children[0];
+          var _entryNode = Array.prototype.slice.call(_children[0].children).reverse();
+          var _opt = [
+            { transform: 'translate3d(0, 30%, 0)', opacity: 0 },
+            { transform: 'none', opacity: 1 },
+          ];
+          var _optDelay = 30;
+          var _groupEntry = [];
+          for (var i = 0, len = _entryNode.length; i < len; i++) {
+            _groupEntry.push(new KeyframeEffect(_entryNode[i], _opt, {
+              delay: _optDelay * i,
+              duration: 200,
+              fill: 'forwards',
+            }));
+          }
+
+          this._entryAnimation = new GroupEffect(_groupEntry);
+          this._exitAnimation = new KeyframeEffect(_exitNode, [
+            { opacity: 1 }, { opacity: 0 }
+          ], {
+            duration: 200,
+          });
+        }
+      },
+
+      /**
+       * Set aria-label on the element.
+       * @param {String} label.
+       */
+      _labelChanged: function (_label) {
+        this.setAttribute('aria-label', _label);
+      },
+
+      /**
+       * Reflect `mini` property to attribute.
+       * @param {Boolean} mini property.
+       */
+      _miniChanged: function (_mini) {
+        this.setAttribute('mini', _mini);
+      },
+
+      /**
+       * Render icon only only when are the icon and src are given.
+       * @param {String, String} icon, src.
+       * @return {Boolean} presence of icon(s).
+       */
+      _shouldRenderIcon: function (_icon, _src) {
+        var _hasIcon = (_icon && _icon.length > 0) || (_src && _src.length > 0);
+        this.set('_shouldShowLabel', !_hasIcon);
+
+        return _hasIcon;
+      },
+
+      open: function () {
+        this.toggle(!0);
+      },
+
+      close: function () {
+        this.toggle(!1);
+      },
+
+      toggle: function (_open) {
+        // Spamming enter or space keys frantically will freeze the element.
+        this.debounce('_toggle', function () {
+          var _opened = typeof _open === 'undefined' ? !this.opened : _open;
+          var _frontIcon = this.$$('#frontIcon');
+          var _backIcon = this.$$('#backIcon');
+
+          if (_frontIcon && _backIcon) {
+            this.toggleClass('visible', !_opened, _frontIcon);
+            this.toggleClass('visible', _opened, _backIcon);
+
+            this.set('opened', _opened);
+            this[_opened ? 'setAttribute' : 'removeAttribute']('opened', '');
+
+            if (!this.noScrim) {
+              this._openScrim(_opened);
+            }
+
+            var _speedDialTimeline = document.timeline.play(_opened ? this._entryAnimation : this._exitAnimation);
+            var _boundGetRipple = this.getRipple.bind(this);
+            _speedDialTimeline.finished.then(function () {
+              // DUe to nested paper-ripple, unable to remove all ripples.
+              // Thus causing performance issues as the ripples will keep
+              // accmulate if at least one is not removed from previous
+              // transition.
+              var _getRipple = _boundGetRipple();
+              if (_getRipple.animating && _getRipple.ripples.length > 0) {
+                if (_getRipple.length > 1) {
+                  for (var i = 0, len = _getRipple.length; i < len; i++) {
+                    _getRipple.removeRipple(_getRipple.ripples[i]);
+                  }
+                }else {
+                  _getRipple.removeRipple(_getRipple.ripples[0]);
+                }
+              }
+            });
+          }
+        }, 100);
+      },
+
+      _openScrim: function (_opened) {
+        if (_opened) {
+          var _scrim = document.createElement('div');
+          this.toggleClass('scrim', !0, _scrim);
+          _scrim.style.position = 'fixed';
+          _scrim.style.top = 0;
+          _scrim.style.left = 0;
+          _scrim.style.height = '100%';
+          _scrim.style.width = '100%';
+          _scrim.style.backgroundColor = this.getComputedStyleValue('--app-speed-dial-scrim-background') || 'rgba(255,255,255,.5)';
+          _scrim.style.zIndex = 111;
+
+          _scrim.addEventListener('tap', this.close.bind(this));
+
+          Polymer.dom(this.ownerDocument.body).appendChild(_scrim);
+        }else {
+          var _scrim = Polymer.dom(this.ownerDocument).querySelector('.scrim');
+          Polymer.dom(this.ownerDocument.body).removeChild(_scrim);
+        }
+      }
+
+    });
+  </script>
+</dom-module>
