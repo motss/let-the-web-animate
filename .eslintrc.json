@@ -1,0 +1,26 @@
+{
+  "extends": [
+    "zumata"
+  ],
+  "plugins": [
+    "html"
+  ],
+  "env": {
+    "browser": true,
+    "node": true
+  },
+  "rules": {
+    "no-console": [
+      "error",
+      { "allow": [ "info", "log", "error", "warn" ] }
+    ],
+    "new-cap": [
+      "error",
+      { "capIsNewExceptions": ["Polymer"] }
+    ],
+    "require-jsdoc": "off"
+  },
+  "globals": {
+    "Polymer": true
+  }
+}

@@ -1,0 +1,29 @@
+FROM node:boron
+
+LABEL MAINTAINER=""
+
+ARG DIRECTORY_NAME=let-the-web-animate
+ARG PORTS_TO_EXPOSE=23571
+
+# setup
+RUN mkdir -p /${DIRECTORY_NAME}
+WORKDIR /${DIRECTORY_NAME}
+
+# install global dependencies
+COPY . ./
+
+# Install global dependencies
+RUN npm install -g http-server
+
+# install local dependencies
+RUN npm install --silent --update-binary
+
+# run build
+RUN npm run build
+
+# ports
+EXPOSE ${PORTS_TO_EXPOSE}
+
+# low-resource init
+RUN echo "tail-file" > ./tail-file
+CMD tail -f ./tail-file

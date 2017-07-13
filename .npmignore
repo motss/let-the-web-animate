@@ -8,7 +8,7 @@ npm-debug.log*
 yarn-error.log*
 build/
 coverage/
-dist/
+dist*/
 dist/**/__mocks__/
 dist/**/__tests__/
 logs/**/[^.]*
