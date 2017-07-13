@@ -1,0 +1,49 @@
+{
+  "name": "let-the-web-animate",
+  "version": "0.0.0",
+  "description": "",
+  "keywords": [
+    "let-the-web-animate",
+    "npm",
+    "zumata"
+  ],
+  "homepage": "",
+  "license": "UNLICENSED",
+  "author": "The Zumata Team",
+  "main": "dist/index.js",
+  "repository": {
+    "type": "git",
+    "url": ""
+  },
+  "scripts": {
+    "build": "sh ./run-build.sh production",
+    "build:clean": "sh ./run-build.sh clean production",
+    "build:test": "rm -rf dist && babel src/ -d dist/",
+    "check": "npm run lint && npm run nsp && npm run snyk",
+    "lint": "eslint ./src",
+    "nsp": "nsp check",
+    "snyk": "snyk test",
+    "watch": "babel -w src/ -d dist/"
+  },
+  "dependencies": {
+    "@polymer/polymer": "^2.0.1",
+    "@webcomponents/webcomponentsjs": "^1.0.1",
+    "eslint-plugin-html": "^3.1.0"
+  },
+  "devDependencies": {
+    "babel-cli": "^6.24.1",
+    "babel-plugin-transform-function-bind": "^6.22.0",
+    "babel-plugin-transform-object-rest-spread": "^6.23.0",
+    "babel-polyfill": "^6.23.0",
+    "babel-preset-babili": "^0.1.3",
+    "babel-preset-env": "^1.5.2",
+    "eslint": "^4.1.0",
+    "eslint-config-zumata": "^0.4.0",
+    "nsp": "^2.6.3",
+    "snyk": "^1.34.4"
+  },
+  "engines": {
+    "node": ">= 6.9.1",
+    "npm": ">= 3.10.8"
+  }
+}

@@ -1,38 +1,17 @@
-# \<let-the-web-animate\>
+# let-the-web-animate
 
-Initiative to create a better web experience with 60fps buttery smooth animation
+> Yet another NPM package to output greetings.
 
-## Install the Polymer-CLI
+Just another NPM package that does simply amazing thing.
 
-First, make sure you have the [Polymer CLI](https://www.npmjs.com/package/polymer-cli) installed. Then run `polymer serve` to serve your application locally.
+## How to use
 
-## Viewing Your Application
+The following is a simple code snippet:
 
+```js
+/* Import the package */
+const greetings = require('let-the-web-animate');
+
+/* Run it and display the output via console.log */
+console.log(greetings()); /* output: Hello World from let-the-web-animate! */
 ```
-$ polymer serve
-```
-
-## Building Your Application
-
-```
-$ polymer build
-```
-
-This will create a `build/` folder with `bundled/` and `unbundled/` sub-folders
-containing a bundled (Vulcanized) and unbundled builds, both run through HTML,
-CSS, and JS optimizers.
-
-You can serve the built versions by giving `polymer serve` a folder to serve
-from:
-
-```
-$ polymer serve build/bundled
-```
-
-## Running Tests
-
-```
-$ polymer test
-```
-
-Your application is already set up to be tested via [web-component-tester](https://github.com/Polymer/web-component-tester). Run `polymer test` to run your application's test suite locally.

@@ -1,0 +1,88 @@
+<link rel="import" href="../node_modules/@polymer/polymer/polymer-element.html">
+<link rel="import" href="../node_modules/@polymer/polymer/lib/utils/flattened-nodes-observer.html">
+
+<dom-module id="app-fab-dialog">
+  <template strip-whitespace>
+    <style>
+      :host {
+        display: block;
+        position: relative;
+        box-sizing: border-box;
+      }
+
+      * {
+        box-sizing: border-box;
+      }
+    </style>
+
+    <slot id="content"></slot>
+  </template>
+</dom-module>
+
+<script>
+  class AppFabDialog extends Polymer.Element {
+    static get is() {
+      return 'app-fab-dialog';
+    }
+
+    static get properties() {
+      return {
+        opened: {
+          type: Boolean,
+          observer: 'onOpenedChanged',
+        },
+
+        _observer: {
+          type: /* @type HTMLElement[] */HTMLElement,
+          readOnly: true,
+        },
+      };
+    }
+
+    static get observers() {
+      return [
+      ];
+    }
+
+    static get observedAttributes() {
+      return [
+      ];
+    }
+
+    constructor() {
+      super();
+    }
+
+    connectedCallback() {
+      super.connectedCallback();
+
+      Polymer.RenderStatus.afterNextRender(this, () => {
+        const slotted = this.shadowRoot.querySelector('slot');
+        const flattenedNodes = Polymer.FlattenedNodesObserver.getFlattenedNodes(slotted);
+
+        console.log('insiders (flattened-nodes) -', flattenedNodes);
+
+        this._observer = new Polymer.FlattenedNodesObserver(slotted, (info) => {
+          console.log('insiders (flattened-nodes-added) -', info.addedNodes);
+          console.log('insiders (flattened-nodes-removed) -', info.removedNodes);
+        });
+
+        // this._observer.disconnect();
+      });
+    }
+
+    disconnectedCallback() {
+      super.disconnectedCallback();
+    }
+
+    attributeChangedCallback(attrName, oldVal, newVal) {
+      super.attributeChangedCallback();
+    }
+
+    onOpenedChanged(newVal, oldVal) {
+      if (newVal === oldVal) return;
+    }
+  }
+
+  window.customElements.define(AppFabDialog.is, AppFabDialog);
+</script>
